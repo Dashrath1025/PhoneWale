@@ -1,0 +1,220 @@
+﻿@model IEnumerable<SubCategory>
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+@{
+}
+
+@{
+    int no = 1;
+}
+
+
+<div class="text-danger text-center">
+    @ViewData["ErrorMessage"]
+</div>
+<div class="text-success text-center">
+    @ViewData["SuccessMessage"]
+</div>
+
+
+
+<button type="button" class="btn btn-outline-success mb-2" data-bs-toggle="modal" data-bs-target="#AddSubCategoryModel">Add SubCategory</button>
+<div class="modal fade" id="AddSubCategoryModel" tabindex="-1" aria-labelledby="AddSubCategory" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header mb-4">
+                <h5 class="modal-title " id="exampleModalLabel">Add SubCategory</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row m-2">
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="txtSubCategory" name="category" placeholder="New SubCategory" maxlength="20"/>
+                        <div class="text-danger" id="divSubCategoryError"></div>
+                    </div>
+                    <div class="row m-2">
+
+                        <label> Choose Category</label><br />
+                        <select asp-items="@(new SelectList(ViewBag.Category,"Id","Name"))"
+                                           id="catvalue"     class="col-sm-5 form-select"></select>
+
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" id="btnAddSubCategory" class="btn btn-primary">Add Category</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div class="modal fade" id="EditSubCategoryModel" tabindex="-1" aria-labelledby="EditSubCategory" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="exampleModalLabel">
+                    Update SubCategory
+                </h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row mb-3">
+                    <input type="hidden" class="form-control" id="editSubCategoryId" />
+                    <label for="editSubCategoryName" class="col-sm-3 col-form-label">Update Name</label>
+                    <div class="col-sm-9">
+                        <input type="text" class="form-control" id="editSubCategoryName" name="Newsubcategory" placeholder="Enter Update SubCategory name" maxlength="20" />
+                    </div>
+                </div>
+                <div class="row mb-3">
+                    <label for="editSubCatCatId" class="col-sm-3 col-form-label">Update Category</label>
+                    <div class="col-sm-9">
+                        <select asp-items="@(new SelectList(ViewBag.Category,"Id","Name"))" class="form-select" id="editSubCatCatId" name="categorysub"></select>
+                    </div>
+                </div>
+                <div class="text-danger" id="divEditSubCategoryError"></div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-success" id="btnEditSubCategory">Save</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<br />
+<table class="table table-danger">
+    <thead>
+        <tr>
+            <th scope="col" class="col-sm-3">Sr.No</th>
+            <th scope="col" class="col-sm-3">SubCategoeyName</th>
+            <th scope="col" class="col-sm">CatId</th>
+            <th scope="col" class="col-sm"></th>
+            <th scope="col" class="col-sm"></th>
+        </tr>
+
+    </thead>
+    <tbody>
+        @foreach (SubCategory sub in Model)
+        {
+
+            <tr>
+                <th scope="row">@no</th>
+                <td>@sub.Name</td>
+                <td>@sub.Cid</td>
+                <td>
+                    <a href="@Url.Action("EditSubCategory", "SubCategory", new { editSubCategoryId = sub.SId})" class="btn btn-outline-success btn-sm m-1" data-bs-toggle="modal"
+                       data-bs-target="#EditSubCategoryModel" data-id="@sub.SId">Edit</a>
+                </td>
+
+                <td><a href="@Url.Action("DeleteSubCategory", "SubCategory", new { Sid = sub.SId })" onclick="return confirm('Are you sure you want to delete this category?')" class="btn btn-outline-danger btn-sm m-1">Delete</a></td>
+
+
+                @{
+                    no++;
+                }
+            </tr>
+        }
+
+    </tbody>
+</table>
+@section Scripts{
+    <script>
+        function IsBlank(input) {
+            let value = input.val().trim();
+            //alert(value);
+            if (value == undefined || value == '')
+                return true;
+            return false;
+        }
+        function IsOnlyNumeric(input) {
+            let value = input.val().trim();
+            return isNaN(value);
+        }
+        $(document).ready(function () {
+            $("#btnAddSubCategory").on("click", function () {
+                $("#divSubCategoryError").text("");
+                let category = $('#txtSubCategory');
+                let catid = $("#catvalue")
+                let blank = IsBlank(category);
+                if (!blank) {
+                    if (!IsOnlyNumeric(category)) {
+                        $("#divSubCategoryError").text("Only numbers are not allowed");
+                        return;
+                    }
+                    else {
+                        $.post("/SubCategory/AddSubCategory",
+                            { name: category.val().trim(), Cid: catid.val() },
+                            function (data) {
+                                if (data) {
+                                    alert("Success");
+                                    window.location.href = "/SubCategory/Index";
+                                }
+                                else {
+                                    alert("Duplicate category not allowed");
+                                }
+                            });
+                    }
+                }
+                else {
+                    $("#divSubCategoryError").text("Category should not empty");
+                    return;
+                }
+            })
+        })
+
+        $(document).ready(function () {
+            $("#EditSubCategoryModel").on("show.bs.modal", function (e) {
+                // Get the button that triggered the modal
+                var button = $(e.relatedTarget);
+                // Get the ID of the category to be edited from data-id attribute of the button
+                var subcategoryId = button.data("id");
+                // Get the name of the category to be edited from data-name attribute of the button
+                var subcategoryName = button.data("name");
+                // Fill the form fields with category ID and name
+                $("#editSubCategoryId").val(subcategoryId);
+                $("#editSubCategoryName").val(subcategoryName);
+            });
+
+            $("#btnEditSubCategory").on("click", function () {
+                var subcategoryId = $("#editSubCategoryId").val();
+                var catid = $("#editSubCatCatId").val();
+
+                var subcategoryName = $("#editSubCategoryName").val().trim();
+
+
+                if (!subcategoryName) {
+                    $("#divEditSubCategoryError").text("SubCategory name is required.");
+                    return;
+                }
+
+                // Update category using AJAX
+                $.ajax({
+                    url: "/SubCategory/Edit",
+                    method: "POST",
+                    data: {
+                        Sid: subcategoryId,
+                        Cid: catid,
+                        name: subcategoryName
+                    },
+                    success: function (data) {
+                        if (data.success) {
+                            // Refresh the category list after successful update
+                            location.reload();
+                        } else {
+                            $("#divEditSubCategoryError").text(data.message);
+                        }
+                    },
+                    error: function () {
+                        $("#divEditSubCategoryError").text("An error occurred while updating the Subcategory, Same Subcategory is present in selected category.");
+                    }
+                });
+            });
+        });
+
+    </script>
+}
+

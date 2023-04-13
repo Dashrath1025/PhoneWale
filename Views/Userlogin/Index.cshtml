@@ -1,0 +1,113 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+
+<h3 class="text-center">Welcome To Phone Wale,  @ViewBag.UserId</h3>
+@model IEnumerable<ProductViewModel>
+
+@{
+    ViewData["Title"] = "visitor Page";
+    string imagePath = string.Empty;
+}
+
+<link href="~/lib/bootstrap-icons/font/bootstrap-icons.css" rel="stylesheet" />
+<link href="~/lib/bootstrap-icons/font/bootstrap-icons.min.css" rel="stylesheet" />
+<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.12.1/css/all.css" crossorigin="anonymous">
+
+
+<div class="container mt-3">
+    <div class="row">
+        <div class="col-md-4">
+            <form asp-controller="Userlogin" asp-action="SearchCategory" method="get">
+                <div class="input-group mb-3">
+                    <select asp-items="@(new SelectList(ViewBag.Category,"Id","Name"))" class="form-select" name="cid">
+                        <option value="">All Category</option>
+                    </select>
+                    <button class="btn btn-outline-dark" type="submit"><i class="bi bi-search"></i></button>
+                </div>
+            </form>
+        </div>
+
+        <div class="col-md-2">
+            <form asp-controller="Userlogin" asp-action="SearchBrand" method="get">
+                <div class="input-group mb-3">
+                    <input type="text" class="form-control" name="brand" placeholder="Brand Name">
+                    <button class="btn btn-outline-dark" type="submit"><i class="bi bi-search"></i></button>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+
+
+
+<div class="text-bg-success text-center rounded">@TempData["success"]</div>
+
+
+@if (TempData["error"] != null)
+{
+<div class="alert alert-danger alert-dismissible fade show" role="alert">
+    <strong class="text-center">@TempData["error"]</strong>
+    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+</div>
+}
+
+
+
+
+<div class="row row-cols-1 row-cols-md-3 g-4 ms-1 mt-3 me-1">
+    @foreach (ProductViewModel each in Model)
+    {
+        if (each.Profile == null)
+        {
+            imagePath = "/images/img.jpg";
+        }
+        else
+        {
+            imagePath = "/images/" + each.Profile;
+        }
+
+        <div class="col mb-3">
+            <div class="card h-100 shadow bg-opacity-25 bg-info">
+                <img src="@imagePath" class="card-img-top h-75" alt="image not found" />
+                <div class="card-body">
+                    <h5 class="card-title">@each.Name</h5>
+                    <hr class="my-2" />
+                    <p class="card-text"><strong>Price:</strong> @each.Rate</p>
+                    @* <a href="@Url.Action("Details", "Userlogin", new { id = each.Id })" class="btn btn-dark">Details</a>*@
+                    <div class="col-sm-4">
+                        <form method="post" action="@Url.Action("AddUserLike", "Userlogin")" class="d-inline-block">
+                            <input type="hidden" name="Pid" value="@each.Id" />
+                            <input type="hidden" name="Uid" value="@ViewBag.UserId" />
+                            <input type="hidden" name="Pname" value="@each.Name" />
+                            <button class="btn btn-outline-danger ml-2" type="submit"><i class="fa fa-heart text-black"></i></button>
+                        </form>
+                    </div>
+                    <br />
+                    <div>
+                        <button class="btn btn-dark"> @Html.ActionLink("Details", "Details", new { PId = each.Id }, new { @class = "text-white text-decoration-none" })</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    }
+</div>
+
+<script type="text/javascript">
+    $(document).ready(function () {
+        if (window.history && window.history.pushState) {
+            window.history.pushState('', null, '');
+            $(window).on('popstate', function () {
+                window.history.pushState('', null, '');
+            });
+        }
+    });
+</script>
+
+
+
+

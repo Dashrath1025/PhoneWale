@@ -1,0 +1,215 @@
+﻿@model IEnumerable<Category>
+
+@{
+    ViewBag.Tile = "Category List";
+    int no = 1;
+}
+@*
+    For more information on enabling MVC for empty projects, visit https://go.microsoft.com/fwlink/?LinkID=397860
+*@
+@{
+}
+
+<div class="text-danger text-center">
+    @ViewData["ErrorMessage"]
+</div>
+<div class="text-success text-center">
+    @ViewData["SuccessMessage"]
+</div>
+
+<nav class="navbar navbar-light mt-1">
+    <a class="navbar-brand btn btn-outline-info" data-bs-toggle="modal"
+       data-bs-target="#AddCategoryModel">Add</a>
+
+</nav>
+
+<div class="modal fade" id="AddCategoryModel" tabindex="-1" aria-labelledby="AddCategory" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="exampleModalLabel">
+                    Add Category
+                </h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+
+            </div>
+            <div class="modal-body">
+                <div class="row m-2">
+                    <div class="col-sm-12">
+                        <input type="text" class="form-control" id="txtCategory" name="category" placeholder="Enter Category name" maxlength="20" />
+                        <div class="text-danger" id="divCategoryError">
+
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" id="btnCategory">Add Category</button>
+                </div>
+            </div>
+        </div>
+
+    </div>
+
+</div>
+
+<div class="modal fade" id="EditCategoryModel" tabindex="-1" aria-labelledby="Edit" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title" id="exampleModalLabel">
+                    Update Category
+                </h4>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="row m-2">
+                    <div class="col-sm-12">
+                        <input type="hidden" class="form-control" id="editCategoryId" />
+                        <input type="text" class="form-control" id="editCategoryName" name="Newcategory" placeholder="Enter category name You want update"  maxlength="20" />
+                        <div class="text-danger" id="divEditCategoryError"></div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                    <button type="button" class="btn btn-success" id="btnEditCategory">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<div class="border border-1 rounded border-secondary bg-transparent text-black p-1 m-1">
+    <div class="row fs-5 fw-bold">
+        <div class="col-sm-2 m-1">Sr.No</div>
+        <div class="col-sm-2 m-1">Name</div>
+    </div>
+
+    @foreach (Category each in Model)
+    {
+        <div class="row border rounded m-1 align-content-center fs-6 word-wrap bg-info">
+            <div class="col-sm-2 align-text-top pt-1">
+                @no
+            </div>
+            <div class="col-sm-4 pt-1">
+                @each.Name
+            </div>
+
+            <div class="col-sm-3 pt-1 ">
+
+                <a href="@Url.Action("Edit", "Category", new { editCategoryId = each.Id})" class="btn btn-outline-success btn-sm m-1" data-bs-toggle="modal"
+                   data-bs-target="#EditCategoryModel" data-id="@each.Id">Edit</a>
+
+                @*<a asp-action="EditCategory" asp-route-id="@each.Id" class="btn btn-outline-success m-1">Edit</a>*@
+
+                 @*<a asp-action="RemoveCategory" asp-route-id="@each.Id" class="btn btn-outline-danger m-1">Delete</a>*@
+                <a href="@Url.Action("RemoveCategory", "Category", new { Cid = each.Id })" onclick="return confirm('Are you sure you want to delete this category?')" class="btn btn-outline-danger btn-sm m-1">Delete</a>
+
+
+            </div>
+            @{
+                no = no + 1;
+            }
+        </div>
+    }
+</div>
+
+@section Scripts{
+    <script>
+        function IsBlank(input) {
+            let value = input.val().trim();
+
+            if (value == undefined || value == '') {
+                return true;
+            }
+            return false;
+
+        }
+
+        function IsOnlyNumeric(input) {
+            let value = input.val().trim();
+            return isNaN(value);
+        }
+
+        $(document).ready(function () {
+            $('#btnCategory').on("click", function () {
+                $("#divCategoryError").text("");
+                let category = $('#txtCategory');
+                let blank = IsBlank(category);
+
+                if (!blank) {
+                    if (!IsOnlyNumeric(category)) {
+                        $("#divCategoryError").text("Only numbers are not allowed");
+                        return;
+                    }
+                    else {
+
+                        $.post("/Category/AddCategory", {
+                            name: category.val().trim()
+                        },
+                            function (data) {
+                                if (data) {
+                                    alert("Success");
+                                    window.location.href = "/Category/Index";
+                                }
+                                else {
+                                    alert(" Category name already exists");
+                                }
+                            });
+                    }
+                }
+                else {
+                    $("#divCategoryError").text("Category should not empty");
+                    return;
+                }
+            })
+        })
+
+        $(document).ready(function () {
+            $("#EditCategoryModel").on("show.bs.modal", function (e) {
+                // Get the button that triggered the modal
+                var button = $(e.relatedTarget);
+                // Get the ID of the category to be edited from data-id attribute of the button
+                var categoryId = button.data("id");
+                // Get the name of the category to be edited from data-name attribute of the button
+                var categoryName = button.data("name");
+                // Fill the form fields with category ID and name
+                $("#editCategoryId").val(categoryId);
+                $("#editCategoryName").val(categoryName);
+            });
+
+            $("#btnEditCategory").on("click", function () {
+                var categoryId = $("#editCategoryId").val();
+                var categoryName = $("#editCategoryName").val().trim();
+
+
+                if (!categoryName) {
+                    $("#divEditCategoryError").text("Category name is required.");
+                    return;
+                }
+
+                // Update category using AJAX
+                $.ajax({
+                    url: "/Category/Edit",
+                    method: "POST",
+                    data: {
+                        Cid: categoryId,
+                        name: categoryName
+                    },
+                    success: function (data) {
+                        if (data.success) {
+                            // Refresh the category list after successful update
+                            location.reload();
+                        }@* else {
+                            $("#divEditCategoryError").text(data.message);
+                        }*@
+                    },
+                    error: function () {
+                        $("#divEditCategoryError").text("An error occurred while updating the category.");
+                    }
+                });
+            });
+        });
+    </script>
+}

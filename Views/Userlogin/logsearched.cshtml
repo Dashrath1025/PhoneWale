@@ -1,0 +1,37 @@
+﻿
+
+@model IEnumerable<ProductViewModel>
+
+
+@{
+    string imagePath = string.Empty;
+}
+
+<div class="row">
+    @foreach (var product in Model)
+    {
+        if (product.Profile == null)
+        {
+            imagePath = "/images/img.jpg";
+        }
+        else
+        {
+            imagePath = "/images/" + product.Profile;
+        }
+
+        <div class="col-md-4 mb-4">
+            <div class="card h-100 bg-opacity-25 bg-info">
+                <img src="@imagePath" class="card-img-top h-75" alt="image not found" />
+                <div class="card-body">
+                    <h5 class="card-title">@product.Name</h5>
+
+                    <p class="card-text"><strong>Price:</strong> @product.Rate</p>
+
+                    @*<a href="@Url.Action("Detail", "Visitor", new { id = product.Id })" class="btn btn-dark">Details</a>*@
+                    <button class="btn btn-dark"> @Html.ActionLink("Details", "Details", new { PId = product.Id }, new { @class = "text-white text-decoration-none" })</button>
+
+                </div>
+            </div>
+        </div>
+    }
+</div>

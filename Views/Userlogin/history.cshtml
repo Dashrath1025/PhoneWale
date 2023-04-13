@@ -1,0 +1,46 @@
+﻿@model IEnumerable<Recently>
+
+@{
+    ViewBag.Title = "User History";
+   
+    int no = 1;
+}
+
+<h2>User History</h2>
+
+@if (ViewData["SuccessMessage"] != null)
+{
+    <div class="alert alert-success">@ViewData["SuccessMessage"]</div>
+}
+
+@if (ViewData["ErrorMessage"] != null)
+{
+    <div class="alert alert-danger">@ViewData["ErrorMessage"]</div>
+}
+
+<p>Showing History for User @ViewBag.Username</p>
+
+<table class="table">
+    <thead>
+        <tr>
+            <th>Sr. No.</th>
+            <th>Product Name</th>
+            <th>Product Id</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var item in Model)
+        {
+            <tr>
+                <td>@no</td>
+                <td>@item.PName</td>
+                <td>@item.PId</td>
+                <td> <a href="@Url.Action("Details", "Logedin", new { Pid = item.PId })" class="btn btn-primary">Details</a></td>
+
+                @{
+                    no = no + 1;
+                }
+            </tr>
+        }
+    </tbody>
+</table>
